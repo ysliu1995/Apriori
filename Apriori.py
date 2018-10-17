@@ -2,26 +2,26 @@ import numpy as np
 import pandas as pd
 import time
 
-support = 0.5
+support = 0.2
 confidence = 0.5
 total_itemset = {}
 
 
-# df = pd.read_csv('dataset.csv')
-# dataset = []
-# for i in df.values:
-#     tmp = []
-#     for j in range(len(i)):
-#         if i[j]:
-#             tmp.append(j+1)
-#     dataset.append(tmp)
+df = pd.read_csv('dataset.csv')
+dataset = []
+for i in df.values:
+    tmp = []
+    for j in range(len(i)):
+        if i[j]:
+            tmp.append(j+1)
+    dataset.append(tmp)
 # print(dataset)
 
-dataset = []
-dataset.append([1, 3, 4])
-dataset.append([2, 3, 5])
-dataset.append([1, 2, 3, 5])
-dataset.append([2, 5])
+# dataset = []
+# dataset.append([1, 3, 4])
+# dataset.append([2, 3, 5])
+# dataset.append([1, 2, 3, 5])
+# dataset.append([2, 5])
 # print(dataset)
 
 
@@ -42,6 +42,7 @@ def checkinside(a, b):
 
 def GenLk(itemset, dataset, support):
     #每個itemset在DB裏頭的加總
+    s = time.time()
     a = {}
     for d in dataset:
         for item in itemset:
@@ -50,14 +51,19 @@ def GenLk(itemset, dataset, support):
                     a[frozenset(item)] = 1
                 else:
                     a[frozenset(item)] += 1
+    e = time.time()
+    print('計數所花時間：{}'.format(e-s))
     #去掉support以下的itemset
+    s = time.time()
     tmp = []
     for item in a:
         if a[item] < len(dataset) * support:
             tmp.append(item)
     for t in tmp:
         del a[t]
-    print(a)
+    e = time.time()
+    print('剪枝所花時間：{}'.format(e-s))
+
     #將Li加入total當中
     total_itemset.update(a)
 
@@ -69,6 +75,7 @@ def GenLk(itemset, dataset, support):
 def GenCk(L):
     # print(L)
     #排列組合
+    s = time.time()
     c = []
     for i in range(len(L)):
         for j in range(i+1,len(L)):
@@ -77,12 +84,20 @@ def GenCk(L):
     
     C = [sorted(list(i)) for i in c]
 
+    e = time.time()
+    print('排列組合所花時間：{}'.format(e-s))
+
     #將itemset中重複的以及去掉不屬於此階段itemset數量的候選
+    s = time.time()
+
     C_tmp = []
     for i in C:
         if len(i) == len(L[0])+1:
             C_tmp.append(tuple(i))
     C = [list(i) for i in list(set(C_tmp))]
+
+    e = time.time()
+    print('去掉重複的所花時間：{}'.format(e-s))
 
     return C
 
