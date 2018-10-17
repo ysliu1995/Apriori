@@ -43,20 +43,91 @@ def CreateTree(data, k):
     return root
 
 
+def Find_In_Tree(root, a, v1, v2, level):
+    print(root, a, v1, v2, level)
+    if v1 == []:                                    #一開始丟進來
+        if len(v2) == level:                        #一開始只有v2有值
+            count = len(v2)
+            p = root
+            for i in range(count):
+                p = p.position[v2[i] % 3]
+                if p == None:
+                    break
+                elif p.child == []:
+                    pass
+                else:
+                    if v2 in p.child:
+                        if frozenset(v2) not in a:
+                            a[frozenset(v2)] = 1
+                        else:
+                            a[frozenset(v2)] += 1
+                        break
+        elif len(v2) > level:                       #如果v2大於此階段的len(itemset)
+            p = root
+            split = v2[:-(level-1)]
+            for i in range(len(split)):
+                aa , bb = v2[i:i+1], v2[i+1:]
+                for i in aa:
+                    p = p.position[i]
+                Find_In_Tree(p, a, aa, bb, level)
+    else:                                           #不是一開始
+        p = root
+        if len(v2) == level-1:                      
+            ans = v1 + v2
+            count = len(v2)
+            for i in range(count):
+                p = p.position[v2[i] % 3]
+                if p == None:
+                    break
+                elif p.child == []:
+                    pass
+                else:
+                    if ans in p.child:
+                        if frozenset(ans) not in a:
+                            a[frozenset(ans)] = 1
+                        else:
+                            a[frozenset(ans)] += 1
+                        break
+        else:
+            flag = v1
+            print(flag)
+            split = v2[:-(level-1)]
+            # print(split[0:1])
+            for i in range(len(split)):
+                aa , bb = v1 + v2[i:i+1], v2[i+1:]
+                print(aa,bb)
+                for i in aa[len(flag):]:
+                    p = p.position[i]
+                Find_In_Tree(p, a, aa, bb, level)
+        
+
+
 if __name__ == '__main__':
 
     data = [[1,4,5],[1,2,4],[4,5,7],[1,2,5],[4,5,8],[1,5,9],[1,3,6],[2,3,4],[5,6,7],[3,4,5],[3,5,6],[3,5,7],[6,8,9],[3,6,7],[3,6,8]]
 
     root = CreateTree(data, 1)
-    print('-----------------------------')
-    print(root.position[0].position[0].child)
-    print(root.position[0].position[1].child)
-    print(root.position[0].position[2].child)
-    print(root.position[1].position[0].child)
-    print(root.position[1].position[1].child)
-    print(root.position[1].position[2].position[0].child)
-    print(root.position[1].position[2].position[1].child)
-    print(root.position[1].position[2].position[2].child)
-    print(root.position[2].child)
+    # print('-----------------------------')
+    # print(root.position[0].position[0].child)
+    # print(root.position[0].position[1].child)
+    # print(root.position[0].position[2].child)
+    # print(root.position[1].position[0].child)
+    # print(root.position[1].position[1].child)
+    # print(root.position[1].position[2].position[0].child)
+    # print(root.position[1].position[2].position[1].child)
+    # print(root.position[1].position[2].position[2].child)
+    # print(root.position[2].child)
+    # print('-----------------------------')
     
+    customer = [1,2,4,5]
+
+    a = {}
+    # v1 =[]
+    # v2 = [1,2,4,5]
+    # v2 = [1,2,4]
+    v1 = [1]
+    v2 = [2,3,4,5]
+    Find_In_Tree(root.position[v1[0]], a, v1, v2, 3)
+    print(a)
+
     
