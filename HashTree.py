@@ -48,70 +48,67 @@ def Find_In_Tree(root, a, fixed, transaction, level):
     print('---------------------------------------------')
     print(root, a, fixed, transaction, level)
     p = root
-    split = transaction[:-(level-len(fixed)-1)]
-    print(split)
-    for s in split:
-        print(s)
-        if p.position[s % 3] == None:
-            print(123)
-        elif p.position[s % 3].child == []:
-            print(456)
-            aa = s
-            index = transaction.index(aa)
-            bb = transaction[index+1:]
-            # print(aa, bb)
-            Find_In_Tree(p.position[s % 3], a, [aa], bb, level)
+    if len(fixed)+len(transaction) == level:
+        compare = fixed + transaction
+        if compare in p.position[transaction[0] % 3].child:
+            if frozenset(compare) not in a:
+                a[frozenset(compare)] = 1
+            else:
+                a[frozenset(compare)] += 1
         else:
-            print(789)
-    print('************')
-    # print(root, a, transaction, level, fixed)
-    # p = root
-    # split = transaction[:-(level-2)]
-    # print(fixed, transaction, split)                        #fixed 已固定, split 可分離出來結合的
-    # if len(fixed) + len(transaction) == level:
-    #     compare = fixed + transaction
-    #     if compare in p.position[len(fixed)+1 % 3].child:
-    #         if frozenset(compare) not in a:
-    #             a[frozenset(compare)] = 1
-    #         else:
-    #             a[frozenset(compare)] += 1
-    # else:
-    #     # if len(fixed) == level-1:
-    #     #     for i in transaction:
-    #     #         compare = pre + [i]
-    #     #             if compare in p.position[split[i] % 3].child:
-    #     #                 if frozenset([i]) not in a:
-    #     #                     a[frozenset([i])] = 1
-    #     #                 else:
-    #     #                     a[frozenset([i])] += 1
-    #     for i in range(len(split)):
-    #         pre = fixed + [split[i]]
-    #         print(split[i], pre)
-    #         if p.position[split[i] % 3] == None:
-    #             pass
-    #         elif p.position[split[i] % 3].child == []:
-    #             # print(pre, transaction[i+1:])
-    #             Find_In_Tree(p.position[split[i] % 3], a, transaction[i+1:], level, pre)
-    #         else:
-    #             ls = itertools.combinations(transaction[i+1:], level-len(pre))
-    #             for com in ls:
-    #                 print(com)
-    #                 # compare = pre + list(com)
-    #                 # if compare in p.position[split[i] % 3].child:
-    #                 #     if frozenset(compare) not in a:
-    #                 #         a[frozenset(compare)] = 1
-    #                 #     else:
-    #                 #         a[frozenset(compare)] += 1
-    #             print('-------------')
+            print('數量已到達但沒有找到')
+    else:
+        split = transaction[:-(level-len(fixed)-1)]
+        print('split : {}'.format(split))
+        if split == []:
+            print('split為空')
+            ls = itertools.combinations(transaction, level-len(fixed))
+            for com in ls:
+                compare = fixed + list(com)
+                print(compare, list(com)[0])
+                if compare in p.position[list(com)[0] % 3].child:
+                    if frozenset(compare) not in a:
+                        a[frozenset(compare)] = 1
+                    else:
+                        a[frozenset(compare)] += 1
+                else:
+                    print('下面樹有值但沒有找到')
+        else:
+            for s in split:
+                print(s)
+                if p.position[s % 3] == None:
+                    print('下面沒有樹')
+                elif p.position[s % 3].child == []:
+                    print('下面的樹split了')
+                    aa = fixed + [s]
+                    index = transaction.index(s)
+                    bb = transaction[index+1:]
+                    print(aa, bb)
+                    Find_In_Tree(p.position[s % 3], a, aa, bb, level)
+                else:
+                    print('下面樹有值')
+                    ls = itertools.combinations(transaction[transaction.index(s)+1:], level-len(fixed)-1)
+                    for com in ls:
+                        print(com)
+                        compare = fixed + [s] + list(com)
+                        print(compare)
+                        if compare in p.position[s % 3].child:
+                            if frozenset(compare) not in a:
+                                a[frozenset(compare)] = 1
+                            else:
+                                a[frozenset(compare)] += 1
+                        else:
+                            print('下面樹有值但沒有找到')
+        print('**********')
         
 
 
 if __name__ == '__main__':
 
-    # data = [[1,4,5],[1,2,4],[4,5,7],[1,2,5],[4,5,8],[1,5,9],[1,3,6],[2,3,4],[5,6,7],[3,4,5],[3,5,6],[3,5,7],[6,8,9],[3,6,7],[3,6,8]]
-    # data = [[3,4,5],[3,5,6],[3,5,7],[6,8,9],[3,6,7],[3,6,8]]
-    # data = [[2,3,4],[5,6,7]]
-    data = [[1,4,5],[1,2,4],[4,5,7],[1,2,5],[4,5,8],[1,5,9],[1,3,6]]
+    data = [[1,4,5],[1,2,4],[4,5,7],[1,2,5],[4,5,8],[1,5,9],[1,3,6],[2,3,4],[5,6,7],[3,4,5],[3,5,6],[3,5,7],[6,8,9],[3,6,7],[3,6,8]]
+    # data = [[2,3,5],[5,6,7],[3,4,5],[3,5,6],[3,5,7],[6,8,9],[3,6,7],[3,6,8]]
+    # data = [[2,3,5],[5,6,7]]
+    # data = [[1,4,5],[1,2,4],[4,5,7],[1,2,5],[4,5,8],[1,5,9],[1,3,6]]
 
     root = CreateTree(data, 1)
     # print('-----------------------------')
@@ -132,5 +129,3 @@ if __name__ == '__main__':
     transaction = [1,2,3,5,6]
     Find_In_Tree(root, a, [], transaction, 3)
     print(a)
-
-    
