@@ -49,32 +49,70 @@ def CreateTree(data, k):
 
     return root
 
-def deleteTree(root):
-    if root is not None:
-        for i in range(10):
-            deleteTree(root.position[i])
-            root.position[i] = None
 
-def inorder(root):
-    if root != None:
-        for i in range(10):
-            inorder(root.position[i])
-        print(root.child)
-
-def Find_In_Tree(root, item):
-    count = len(item)
+def Find_In_Tree(root, a, fixed, transaction, level):
+    # print('---------------------------------------------')
+    # print(root, a, fixed, transaction, level)
     p = root
-    for i in range(count):
-        p = p.position[item[i] % 10]
-        if p == None:
-            break
-        elif p.child == []:
+    if len(fixed)+len(transaction) == level:
+        compare = fixed + transaction
+        if p.position[transaction[0] % 10] == None:
             pass
+        elif compare in p.position[transaction[0] % 10].child:
+            if frozenset(compare) not in a:
+                a[frozenset(compare)] = 1
+            else:
+                a[frozenset(compare)] += 1
+        # else:
+        #     print('數量已到達但沒有找到')
+    else:
+        split = transaction[:-(level-len(fixed)-1)]
+        # print('split : {}'.format(split))
+        if split == []:
+            # print('split為空')
+            ls = itertools.combinations(transaction, level-len(fixed))
+            for com in ls:
+                compare = fixed + list(com)
+                # print(compare, list(com)[0])
+                if p.position[list(com)[0] % 10] == None:
+                    pass
+                elif compare in p.position[list(com)[0] % 10].child:
+                    if frozenset(compare) not in a:
+                        a[frozenset(compare)] = 1
+                    else:
+                        a[frozenset(compare)] += 1
+                # else:
+                    # print('下面樹有值但沒有找到')
         else:
-            if item in p.child:
-                return True
-    
-    return False
+            for s in split:
+                # print(s)
+                if p.position[s % 10] == None:
+                    pass
+                    # print('下面沒有樹')
+                elif p.position[s % 10].child == []:
+                    # print('下面的樹split了')
+                    aa = fixed + [s]
+                    index = transaction.index(s)
+                    bb = transaction[index+1:]
+                    # print(aa, bb)
+                    Find_In_Tree(p.position[s % 10], a, aa, bb, level)
+                else:
+                    # print('下面樹有值')
+                    ls = itertools.combinations(transaction[transaction.index(s)+1:], level-len(fixed)-1)
+                    for com in ls:
+                        # print(com)
+                        compare = fixed + [s] + list(com)
+                        # print(compare)
+                        if p.position[s % 10] == None:
+                            pass
+                        elif compare in p.position[s % 10].child:
+                            if frozenset(compare) not in a:
+                                a[frozenset(compare)] = 1
+                            else:
+                                a[frozenset(compare)] += 1
+        #                 else:
+        #                     print('下面樹有值但沒有找到')
+        # print('**********')
     
     
 
@@ -115,41 +153,18 @@ def checkinside(a, b):
 
 def GenLk(itemset, dataset, support):
     a = {}
+
     s = time.time()
     root = CreateTree(itemset, 1)
-    # inorder(root)
     e = time.time()
     print('建樹所花時間：{}'.format(e-s))
     
-    s = time.time()
-    for customer in dataset:
-        if len(itemset[0]) > 3:
-            for item in itemset:
-                if checkinside(frozenset(item), frozenset(customer)):  #item在不在DB當中
-                    if frozenset(item) not in a:                #item在不在itemset當中
-                        a[frozenset(item)] = 1
-                    else:
-                        a[frozenset(item)] += 1
-        else:
-            ls = itertools.combinations(customer, len(itemset[0]))
-            tt = [sorted(list(item)) for item in ls]
-            tt_tmp = [tuple(i)for i in tt]
-            tts = [list(i) for i in list(set(tt_tmp))]
-            for item in tts:
-                if Find_In_Tree(root, item):
-                    if frozenset(item) not in a:         
-                        a[frozenset(item)] = 1
-                    else:
-                        a[frozenset(item)] += 1
+    s = time.time() 
+    for transaction in dataset:
+        Find_In_Tree(root, a, [], transaction, len(itemset[0]))
     e = time.time()
     print('計數所花時間：{}'.format(e-s))
     # print(a)
-
-    #刪掉tree
-    # print('-----------------------')
-    # deleteTree(root)
-    # inorder(root)
-    # print('-----------------------')
 
     #去掉support以下的itemset
     s = time.time()
@@ -210,6 +225,7 @@ dataset = Load_Data()
 itemset = creatC(dataset)
 i = 1
 while(1):
+# for i in range(2):
     start = time.time()
 
     L = GenLk(itemset, dataset, support)
