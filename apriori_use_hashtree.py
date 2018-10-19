@@ -216,7 +216,7 @@ def GenCk(L):
 
 
 support = 0.2
-confidence = 0.5
+confidence = 0.9
 total_itemset = {}
 
 
@@ -243,4 +243,25 @@ while(1):
     i += 1
 
     print('-------------------------')
+
+print(total_itemset)
+print('********************')
+
+for subset in total_itemset:
+    if len(subset) > 1:
+        subset = list(subset)
+        # print(subset)
+        for j in range(int(len(subset)/2)):
+            ls = itertools.combinations(subset, j+1)
+            for com in ls:
+                tmp = subset
+                # print(list(com), list(set(tuple(subset)).difference(set(com))))
+                con1 = total_itemset[frozenset(subset)]/total_itemset[frozenset(list(com))]
+                if con1 >= confidence:
+                    print('{}->{}, confidence : {}'.format(list(com), list(set(tuple(subset)).difference(set(com))), con1))
+                con2= total_itemset[frozenset(subset)]/total_itemset[frozenset(list(set(tuple(subset)).difference(set(com))))]
+                if con2 >= confidence:
+                    print('{}->{}, confidence : {}'.format(list(set(tuple(subset)).difference(set(com))), list(com), con2))
+        # print('-')
+print('********************')
 
