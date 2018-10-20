@@ -247,6 +247,8 @@ while(1):
 print(total_itemset)
 print('********************')
 
+total_rule = []
+
 for subset in total_itemset:
     if len(subset) > 1:
         subset = list(subset)
@@ -255,13 +257,17 @@ for subset in total_itemset:
             ls = itertools.combinations(subset, j+1)
             for com in ls:
                 tmp = subset
-                # print(list(com), list(set(tuple(subset)).difference(set(com))))
                 con1 = total_itemset[frozenset(subset)]/total_itemset[frozenset(list(com))]
                 if con1 >= confidence:
+                    total_rule.append([com, tuple(set(tuple(subset)).difference(set(com))), con1])
                     print('{}->{}, confidence : {}'.format(list(com), list(set(tuple(subset)).difference(set(com))), con1))
                 con2= total_itemset[frozenset(subset)]/total_itemset[frozenset(list(set(tuple(subset)).difference(set(com))))]
                 if con2 >= confidence:
+                    total_rule.append([tuple(set(tuple(subset)).difference(set(com))), com, con2])
                     print('{}->{}, confidence : {}'.format(list(set(tuple(subset)).difference(set(com))), list(com), con2))
-        # print('-')
+            # print('-')
 print('********************')
-
+# print(total_rule)
+tu = set(tuple(l) for l in total_rule)
+c = [list(t) for t in tu]
+print(c)
