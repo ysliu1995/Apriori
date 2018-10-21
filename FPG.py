@@ -25,12 +25,35 @@ def Load_Data():
     #             tmp.append(j+1)
     #     dataset.append(tmp)
 
+    # dataset = []
+    # dataset.append(['a', 'c', 'd', 'f', 'g', 'i', 'm', 'p'])
+    # dataset.append(['a', 'b', 'c', 'f', 'i', 'm', 'o'])
+    # dataset.append(['b', 'f', 'h', 'j', 'o'])
+    # dataset.append(['b', 'c', 'k', 's', 'p'])
+    # dataset.append(['a', 'c', 'e', 'f', 'l', 'm', 'n', 'p'])
+
     dataset = []
-    dataset.append(['a', 'c', 'd', 'f', 'g', 'i', 'm', 'p'])
-    dataset.append(['a', 'b', 'c', 'f', 'i', 'm', 'o'])
-    dataset.append(['b', 'f', 'h', 'j', 'o'])
-    dataset.append(['b', 'c', 'k', 's', 'p'])
-    dataset.append(['a', 'c', 'e', 'f', 'l', 'm', 'n', 'p'])
+    dataset.append(['Milk', 'Bread', 'Beer'])
+    dataset.append(['Bread', 'Coffee'])
+    dataset.append(['Bread', 'Egg'])
+    dataset.append(['Milk', 'Bread', 'Coffee'])
+    dataset.append(['Milk', 'Egg'])
+    dataset.append(['Bread', 'Egg'])
+    dataset.append(['Milk', 'Egg'])
+    dataset.append(['Milk', 'Bread', 'Egg', 'Beer'])
+    dataset.append(['Milk', 'Bread', 'Egg'])
+
+    # dataset = []
+    # dataset.append([1, 3, 4])
+    # dataset.append([2, 3, 5])
+    # dataset.append([1, 2, 3, 5])
+    # dataset.append([2, 5])
+
+    # dataset = []
+    # dataset.append([1, 2, 3])
+    # dataset.append([3, 4, 2, 1])
+    # dataset.append([4, 5, 1])
+    # dataset.append([2, 1])
 
     return dataset
 
@@ -56,7 +79,7 @@ def GenLk(itemset, dataset, support):
     #去掉support以下的itemset
     tmp = []
     for item in a:
-        if a[item] < 3:
+        if a[item] < 2:
             tmp.append(item)
     for t in tmp:
         del a[t]
@@ -122,70 +145,93 @@ def CreateFPtree(reorder, a):
         # print('****************')
     return root, store
 
+def CreateFrequentTree(data, cnt):
+    
+    root = FPtree()
+    for customer in data:
+        # print(customer)
+        p = root
+        for item in customer:
+            tmp = p
+            # print(item, tmp.child)
+            if tmp.child == []:
+                n = FPtree()
+                tmp.child.append(n)
+                n.parent= tmp
+                n.item = item
+                n.cnt += cnt
+                # store[item].append(n)
+                p = n
+            else:
+                flag = 0
+                for i in tmp.child:
+                    if i.item == item:
+                        i.cnt += 1
+                        p = i
+                        flag = 1
+                        break
+                if flag == 0:
+                    n = FPtree()
+                    tmp.child.append(n)
+                    n.parent= tmp
+                    n.item = item
+                    n.cnt += cnt
+                    # store[item].append(n)
+                    p = n
+        # print('****************')
+    return root
+
+def FindFrequent(i, store):
+    tmp1 = []
+    tmp2 = []
+    for n in store[i]:
+        p = n
+        tmp2.append(p.cnt)
+        t = []
+        p = p.parent
+        while p.item != None:
+            t.append(p.item)
+            p = p.parent
+        tmp1.append(t)
+    print('element :', i)
+    print('parent :', tmp1)
+    print('cnt :', tmp2)
+    for i in range(1):
+        root = CreateFrequentTree(tmp1[i], tmp2[i])
+        print(root.item)
+    print('****')
+
+    return ans
+    
+
 
 support = 0.5
 
 if __name__ == '__main__':
 
     dataset = Load_Data()
-    print(dataset)
+    # print(dataset)
     C = creatC(dataset)
     a = GenLk(C, dataset, support)
-    # print(a)
+    print(a)
     reorder = Reorder(dataset, a)
-    print(reorder)
+    # print(reorder)
     print('-----------------')
 
     root, store = CreateFPtree(reorder, a)
-    
-    ans = {}
-    for i in list(a):
-        # print(store[i])
-        tmp0 = []
-        tmp1 = []
-        tmp2 = []
-        for n in store[i]:
-            # print(n)
-            p = n
-            tmp0.append(p.item)
-            cnt = p.cnt
-            t = []
-            p = p.parent
-            while p.item != None:
-                t.append(p.item)
-                p = p.parent
-            
-            tmp1.append(t)
-            tmp2.append(cnt)
-        print(tmp0)
-        print(tmp1)
-        print(tmp2)
-        if tmp2[0] <3:
-            s = set(tmp1[0])
-            for k in tmp1[1:]:
-                s = s.intersection(set(k))
-            print(s)
-            if s == set():
-                pass
-            else:
-                # print('-')
-                # print(list(set(tmp0[0]))+list(s))
-                for j in range(len(list(s))):
-                    com = list(itertools.combinations(s, j+1))
-                    for c in com:
-                        d = list(tmp0[0]) + list(com)
-                        ans[tuple(d)] = sum(tmp2)
 
-        else:
-            if tmp1[0] != []:
-                s = tmp1[0]
-                # ans[tuple(tmp1[0])] = tmp2[0]
-                for j in range(len(list(s))):
-                    com = list(itertools.combinations(s, j+1))
-                    for c in com:
-                        d = list(tmp0[0]) + list(com)
-                        ans[tuple(d)] = sum(tmp2)
-        print(ans)
-        print('---------')
-    print(ans)
+    aa = list(a.keys())
+    bb = list(a.values())
+    t = []
+    for i in range(len(list(a.keys()))):
+        tmp = [aa[i],bb[i]]
+        t.append(tmp)
+    t = sorted(t, key=lambda s : s[-1],reverse = False)
+    print(t)
+
+    ans = {}
+    for i in t:
+        FindFrequent(i[0], store)
+        print('-')
+        
     
